@@ -70,9 +70,13 @@ def main():
                         sell_amount = btc * 0.5  # 보유량의 50%만 매도
                         upbit.sell_market_order(ticker, sell_amount)
                         logging.info(f"익절 매도: {ticker} - 수익률: {profit_rate:.2f}%")
-                    elif profit_rate <= -3:  # 3% 이상 손실 시 손절
+                    elif profit_rate <= -3:  # 3% 이상 손실 시 부분 손절
+                        sell_amount = btc * 0.5  # 보유량의 50%만 매도
+                        upbit.sell_market_order(ticker, sell_amount)
+                        logging.info(f"부분 손절 매도: {ticker} - 수익률: {profit_rate:.2f}%")
+                    elif profit_rate <= -5:  # 5% 이상 손실 시 전량 손절
                         upbit.sell_market_order(ticker, btc)
-                        logging.info(f"손절 매도: {ticker} - 수익률: {profit_rate:.2f}%")
+                        logging.info(f"전량 손절 매도: {ticker} - 수익률: {profit_rate:.2f}%")
             
             time.sleep(180)  # 3분마다 체크 (너무 자주 체크할 필요 없음)
             
