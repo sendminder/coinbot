@@ -10,17 +10,16 @@ from src.utils.logger import setup_logger, get_logger
 from src.trading.account import TradingAccount
 from src.trading.market import Market
 from src.trading.order import OrderManager
-from src.config.trading_config import TradingConfig, Environment
+from src.config.trading_config import TradingConfig
 
 class TradingBot:
     def __init__(self, 
-                 strategy_type: TradingStrategy = TradingStrategy.COMBINED,
-                 env: Environment = Environment.PRODUCTION):
+                 strategy_type: TradingStrategy = TradingStrategy.COMBINED):
         """트레이딩 봇 초기화"""
         setup_logger()
         self.logger = get_logger(__name__)
         
-        self.config = TradingConfig(env)
+        self.config = TradingConfig()
         if not self.config.is_valid():
             raise ValueError("설정이 올바르지 않습니다.")
             
