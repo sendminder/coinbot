@@ -4,10 +4,6 @@ import pyupbit
 from datetime import datetime
 
 class Market:
-    def __init__(self):
-        self.ha_interval = "minute60"    # 하이킨 아시용 1시간봉
-        self.trade_interval = "minute240"  # 거래용 4시간봉
-
     def get_current_price(self, ticker: str) -> Optional[float]:
         """현재가 조회"""
         try:

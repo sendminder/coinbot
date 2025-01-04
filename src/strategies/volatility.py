@@ -3,12 +3,15 @@ import pyupbit
 from .base import Strategy
 
 class VolatilityStrategy(Strategy):
+    def __init__(self):
+        self.trade_interval = "minute240"  # 거래용 4시간봉
+
     def get_target_price(self, ticker: str) -> Optional[float]:
         """
         변동성 돌파 전략의 목표가 계산
         """
         try:
-            df = pyupbit.get_ohlcv(ticker, interval=self.bot.trade_interval, count=2)
+            df = pyupbit.get_ohlcv(ticker, interval=self.trade_interval, count=2)
             target_price = df.iloc[0]['close'] + (df.iloc[0]['high'] - df.iloc[0]['low']) * 0.5
             return target_price
         except Exception as e:

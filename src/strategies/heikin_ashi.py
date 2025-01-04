@@ -3,12 +3,15 @@ import pyupbit
 from .base import Strategy
 
 class HeikinAshiStrategy(Strategy):
+    def __init__(self):
+        self.ha_interval = "minute60"    # 하이킨 아시용 1시간봉
+
     def get_heikin_ashi(self, ticker: str) -> Optional[Dict]:
         """
         하이킨 아시 지표 계산
         """
         try:
-            df = pyupbit.get_ohlcv(ticker, interval=self.bot.ha_interval, count=24)
+            df = pyupbit.get_ohlcv(ticker, interval=self.ha_interval, count=24)
             
             ha_close = (df['open'] + df['high'] + df['low'] + df['close']) / 4
             ha_open = (df['open'].shift(1) + df['close'].shift(1)) / 2
