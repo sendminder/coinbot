@@ -39,21 +39,21 @@ class OrderManager:
     def execute_sell(self, coin: str, coin_config: CoinConfig, current_price: float) -> None:
         """매도 로직 실행"""
         try:
-            self.logger.debug(f"매도 검토 시작 - {coin_config.ticker}")
+            self.logger.info(f"매도 검토 시작 - {coin_config.ticker}")
             balance = self.account.get_balance(coin)
             if balance <= coin_config.min_unit:
-                self.logger.debug(f"매도 검토 제외 - {coin_config.ticker}: 최소 거래량({coin_config.min_unit}) 미만")
+                self.logger.info(f"매도 검토 제외 - {coin_config.ticker}: 최소 거래량({coin_config.min_unit}) 미만")
                 return
 
             avg_price = self.account.get_average_buy_price(coin_config.ticker)
             if avg_price == 0:
-                self.logger.debug(f"매도 검토 제외 - {coin_config.ticker}: 평균 매수가 없음")
+                self.logger.info(f"매도 검토 제외 - {coin_config.ticker}: 평균 매수가 없음")
                 return
 
             profit_rate = ((current_price - avg_price) / avg_price) * 100
             profit_krw = (current_price - avg_price) * balance
             
-            self.logger.debug(
+            self.logger.info(
                 f"매도 검토 중 - {coin_config.ticker}: "
                 f"현재가 {current_price:,}원, 평균매수가 {avg_price:,}원, "
                 f"수익률 {profit_rate:.2f}%, 수익금액 {profit_krw:,.0f}원"
@@ -67,9 +67,9 @@ class OrderManager:
                         self.upbit.sell_market_order(coin_config.ticker, sell_amount)
                         self.logger.info(f"익절 매도: {coin_config.ticker} - 수익률: {profit_rate:.2f}%, 수익금액: {profit_krw:,.0f}원")
                     else:
-                        self.logger.debug(f"익절 보류 - {coin_config.ticker}: 매도량({sell_amount})이 최소 거래량({coin_config.min_unit}) 미만")
+                        self.logger.info(f"익절 보류 - {coin_config.ticker}: 매도량({sell_amount})이 최소 거래량({coin_config.min_unit}) 미만")
                 else:
-                    self.logger.debug(f"익절 보류 - {coin_config.ticker}: 최소 수익금액({self.config.trade_settings.min_profit_krw:,}원) 미만")
+                    self.logger.info(f"익절 보류 - {coin_config.ticker}: 최소 수익금액({self.config.trade_settings.min_profit_krw:,}원) 미만")
                 return
 
             # 손절
