@@ -3,7 +3,7 @@ from src.trading.bot import TradingBot
 
 def main():
     """프로그램 시작점"""
-    strategy = TradingStrategy.COMBINED
+    strategy = TradingStrategy.HEIKIN_ASHI
     bot = TradingBot(strategy)
     bot.run()
 

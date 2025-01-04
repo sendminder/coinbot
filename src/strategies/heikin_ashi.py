@@ -40,7 +40,6 @@ class HeikinAshiStrategy(Strategy):
                 'prev_trend': 'up' if ha_close.iloc[-2] > ha_open.iloc[-2] else 'down'
             }
             
-            self.bot.logger.info(f"하이킨 아시 데이터 - {ticker}: {result}")
             return result
             
         except Exception as e:
@@ -52,6 +51,13 @@ class HeikinAshiStrategy(Strategy):
         ha_data = self.get_heikin_ashi(ticker)
         if ha_data is None:
             return False
+        
+        self.bot.logger.info(
+            f"하이킨 아시 분석 - {ticker}: "
+            f"추세={ha_data['trend']}, "
+            f"강세여부={ha_data['strong_trend']}, "
+            f"이전추세={ha_data['prev_trend']}"
+        )
             
         return (ha_data['trend'] == 'up' and 
                 ha_data['strong_trend'] and 
