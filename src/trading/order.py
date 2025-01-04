@@ -39,6 +39,7 @@ class OrderManager:
     def execute_sell(self, coin: str, coin_config: CoinConfig, current_price: float) -> None:
         """매도 로직 실행"""
         try:
+            self.logger.debug(f"매도 검토 시작 - {coin_config.ticker}")
             balance = self.account.get_balance(coin)
             if balance <= coin_config.min_unit:
                 self.logger.debug(f"매도 검토 제외 - {coin_config.ticker}: 최소 거래량({coin_config.min_unit}) 미만")

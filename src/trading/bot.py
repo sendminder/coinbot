@@ -99,7 +99,7 @@ class TradingBot:
 
                 #if self.market.is_trade_time():
                 self._execute_trading_cycle()
-                daily_trade_count += 1
+                daily_trade_count += 20
 
                 self.logger.info(
                     f"상태 업데이트 - 거래횟수: {daily_trade_count}/{self.config.trade_settings.max_daily_trades}, "
