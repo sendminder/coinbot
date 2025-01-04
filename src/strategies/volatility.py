@@ -4,6 +4,7 @@ from .base import Strategy
 
 class VolatilityStrategy(Strategy):
     def __init__(self):
+        super().__init__()  # 부모 클래스 초기화
         self.trade_interval = "minute240"  # 거래용 4시간봉
 
     def get_target_price(self, ticker: str) -> Optional[float]:
