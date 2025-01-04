@@ -101,13 +101,13 @@ class TradingBot:
                     time.sleep(self.config.trade_settings.trade_interval)
                     continue
 
-                if self.market.is_trade_time():
-                    self._execute_trading_cycle()
-                    daily_trade_count += 1
+                #if self.market.is_trade_time():
+                self._execute_trading_cycle()
+                daily_trade_count += 1
 
                 self.logger.info(
                     f"상태 업데이트 - 거래횟수: {daily_trade_count}/{self.config.trade_settings.max_daily_trades}, "
-                    f"전략: {self.strategy_type.value}"
+                    f"전략: {self.strategy_type}"
                 )
                 time.sleep(self.config.trade_settings.trade_interval)
 
@@ -117,15 +117,15 @@ class TradingBot:
 
     def _execute_trading_cycle(self):
         """거래 사이클 실행"""
-        for coin, settings in self.config.coin_settings.items():
-            ticker = settings["ticker"]
+        for coin, coin_config in self.config.coin_settings.items():
+            ticker = coin_config.ticker
             current_price = self.market.get_current_price(ticker)
             
             if current_price is None:
                 continue
 
             self.order_manager.execute_buy(ticker, current_price, self.strategy)
-            self.order_manager.execute_sell(coin, settings, current_price)
+            self.order_manager.execute_sell(coin, coin_config, current_price)
             time.sleep(1)
 
         self.account.log_portfolio_status(self.config.coin_settings) 

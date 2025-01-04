@@ -45,8 +45,8 @@ class TradingAccount:
         try:
             total_value = self.get_balance("KRW")
             
-            for coin, settings in coin_settings.items():
-                ticker = settings["ticker"]
+            for coin, coin_config in coin_settings.items():
+                ticker = coin_config.ticker
                 balance = self.get_balance(coin)
                 avg_price = self.get_average_buy_price(ticker)
                 
