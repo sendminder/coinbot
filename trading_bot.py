@@ -108,6 +108,11 @@ class TradingBot:
         self.ha_interval = "minute60"    # 하이킨 아시용 1시간봉
         self.trade_interval = "minute240"  # 거래용 4시간봉
 
+        # 투자 설정
+        self.TOTAL_ASSETS = 4000000  # 총 자산 400만원
+        self.MIN_INVEST_RATIO = 0.015  # 최소 투자비율 1.5%
+        self.MAX_INVEST_RATIO = 0.05   # 최대 투자비율 5%
+
     def _initialize_logging(self) -> None:
         """로깅 설정 초기화"""
         logging.basicConfig(
@@ -290,12 +295,18 @@ class TradingBot:
                 return
                 
             krw = self.get_balance("KRW")
-            max_investment = krw * 0.05  # 각 코인당 최대 5% 투자
             
-            if krw > 5000:  # 최소 주문금액
-                invest_amount = min(krw * 0.9995, max_investment)  # 수수료 고려
+            # 투자금액 범위 계산
+            min_investment = self.TOTAL_ASSETS * self.MIN_INVEST_RATIO  # 6만원
+            max_investment = self.TOTAL_ASSETS * self.MAX_INVEST_RATIO  # 20만원
+            
+            # 잔고의 5%와 최소/최대 투자금액 범위 내에서 결정
+            invest_amount = min(max(krw * 0.05, min_investment), max_investment)
+            
+            if krw > invest_amount:  # 잔고가 투자금액보다 큰 경우에만 매수
+                invest_amount = invest_amount * 0.9995  # 수수료 고려
                 self.upbit.buy_market_order(ticker, invest_amount)
-                logging.info(f"매수 성공: {ticker} - 가격: {current_price:,}원, 투자금액: {invest_amount:,}원, 전략: {self.strategy_type.value}")
+                logging.info(f"매수 성공: {ticker} - 가격: {current_price:,}원, 투자금액: {invest_amount:,}원 (총자산의 {(invest_amount/self.TOTAL_ASSETS)*100:.1f}%), 전략: {self.strategy_type.value}")
                 
         except Exception as e:
             logging.error(f"매수 실패 - {ticker}: {e}")
