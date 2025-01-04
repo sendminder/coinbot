@@ -3,8 +3,8 @@ import pyupbit
 from .base import Strategy
 
 class HeikinAshiStrategy(Strategy):
-    def __init__(self):
-        super().__init__()  # 부모 클래스 초기화
+    def __init__(self, bot):
+        super().__init__(bot)  # 부모 클래스 초기화
         self.ha_interval = "minute60"    # 하이킨 아시용 1시간봉
 
     def get_heikin_ashi(self, ticker: str) -> Optional[Dict]:
