@@ -16,6 +16,7 @@ class OrderManager:
         """매수 로직 실행"""
         try:
             if not strategy.should_buy(ticker, current_price):
+                self.logger.info(f"매수 안함 - {ticker}: 매수 조건 불만족")
                 return
                 
             krw = self.account.get_balance("KRW")
@@ -29,6 +30,8 @@ class OrderManager:
                     f"투자금액: {invest_amount:,}원 "
                     f"(총자산의 {(invest_amount/self.account.TOTAL_ASSETS)*100:.1f}%)"
                 )
+            else:
+                self.logger.info(f"매수 안함 - {ticker}: 잔액 부족")
                 
         except Exception as e:
             self.logger.error(f"매수 실패 - {ticker}: {e}")
