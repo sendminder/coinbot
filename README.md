@@ -26,17 +26,24 @@ git clone https://github.com/sendminder/coinbot.git
 cd coinbot
 ``` 
 
-### 2. 환경 설정
+### 2. 가상환경 설정 및 활성화
 ```bash
-# 설치 스크립트 실행
-chmod +x setup.sh
-./setup.sh
-
-# 또는 수동으로 의존성 설치
-pip install -r requirements.txt
+python3 -m venv venv
+source venv/bin/activate
 ```
 
-### 3. 설정 파일 구성
+### 3. 기본 패키지 설치
+```bash
+pip3 install --upgrade pip
+pip3 install setuptools wheel
+```
+
+### 4. 의존성 패키지 설치
+```bash
+pip3 install -r requirements.txt
+```
+
+### 5. 설정 파일 구성
 
 1. `.env` 파일 생성
 ```plaintext
