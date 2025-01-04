@@ -10,5 +10,5 @@ class CombinedStrategy(Strategy):
 
     def should_buy(self, ticker: str, current_price: float) -> bool:
         """복합 전략 매수 시점 판단"""
-        return (self.volatility.should_buy(ticker, current_price) and 
+        return (self.volatility.should_buy(ticker, current_price) or 
                 self.heikin_ashi.should_buy(ticker, current_price)) 

@@ -1,6 +1,3 @@
-import logging
-from typing import Dict
-import pyupbit
 from src.config.trading_config import CoinConfig
 from src.utils.logger import get_logger
 
@@ -39,7 +36,6 @@ class OrderManager:
     def execute_sell(self, coin: str, coin_config: CoinConfig, current_price: float) -> None:
         """매도 로직 실행"""
         try:
-            self.logger.info(f"매도 검토 시작 - {coin_config.ticker}")
             balance = self.account.get_balance(coin)
             if balance <= coin_config.min_unit:
                 self.logger.info(f"매도 검토 제외 - {coin_config.ticker}: 최소 거래량({coin_config.min_unit}) 미만")
@@ -53,12 +49,6 @@ class OrderManager:
             profit_rate = ((current_price - avg_price) / avg_price) * 100
             profit_krw = (current_price - avg_price) * balance
             
-            self.logger.info(
-                f"매도 검토 중 - {coin_config.ticker}: "
-                f"현재가 {current_price:,}원, 평균매수가 {avg_price:,}원, "
-                f"수익률 {profit_rate:.2f}%, 수익금액 {profit_krw:,.0f}원"
-            )
-
             # 익절
             if profit_rate >= coin_config.take_profit:
                 if profit_krw >= self.config.trade_settings.min_profit_krw:
@@ -66,10 +56,6 @@ class OrderManager:
                     if sell_amount >= coin_config.min_unit:
                         self.upbit.sell_market_order(coin_config.ticker, sell_amount)
                         self.logger.info(f"익절 매도: {coin_config.ticker} - 수익률: {profit_rate:.2f}%, 수익금액: {profit_krw:,.0f}원")
-                    else:
-                        self.logger.info(f"익절 보류 - {coin_config.ticker}: 매도량({sell_amount})이 최소 거래량({coin_config.min_unit}) 미만")
-                else:
-                    self.logger.info(f"익절 보류 - {coin_config.ticker}: 최소 수익금액({self.config.trade_settings.min_profit_krw:,}원) 미만")
                 return
 
             # 손절

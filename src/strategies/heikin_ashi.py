@@ -52,13 +52,16 @@ class HeikinAshiStrategy(Strategy):
         if ha_data is None:
             return False
         
-        self.bot.logger.info(
-            f"하이킨 아시 분석 - {ticker}: "
-            f"추세={ha_data['trend']}, "
-            f"강세여부={ha_data['strong_trend']}, "
-            f"이전추세={ha_data['prev_trend']}"
-        )
-            
-        return (ha_data['trend'] == 'up' and 
+        buy = (ha_data['trend'] == 'up' and 
                 ha_data['strong_trend'] and 
-                ha_data['prev_trend'] == 'down')  # 상승 반전 시점 
+                ha_data['prev_trend'] == 'down')
+
+        if buy:
+            self.bot.logger.info(
+                f"하이킨 아시 분석 - {ticker}: "
+                f"추세={ha_data['trend']}, "
+                f"강세여부={ha_data['strong_trend']}, "
+                f"이전추세={ha_data['prev_trend']}"
+            )
+            
+        return buy  # 상승 반전 시점 

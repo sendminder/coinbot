@@ -94,17 +94,13 @@ class TradingBot:
 
                 if daily_trade_count >= self.config.trade_settings.max_daily_trades:
                     self.logger.info("일일 거래 한도 도달")
-                    time.sleep(self.config.trade_settings.trade_interval)
+                    time.sleep(1000)
                     continue
 
-                #if self.market.is_trade_time():
-                self._execute_trading_cycle()
-                daily_trade_count += 20
+                if self.market.is_trade_time():
+                    self._execute_trading_cycle()
+                    daily_trade_count += 1
 
-                self.logger.info(
-                    f"상태 업데이트 - 거래횟수: {daily_trade_count}/{self.config.trade_settings.max_daily_trades}, "
-                    f"전략: {self.strategy_type}"
-                )
                 time.sleep(self.config.trade_settings.trade_interval)
 
             except Exception as e:

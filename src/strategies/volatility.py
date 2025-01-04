@@ -25,7 +25,11 @@ class VolatilityStrategy(Strategy):
         - 현재가가 목표가를 상향 돌파하면 매수
         """
         target_price = self.get_target_price(ticker)
-        self.bot.logger.info(f"목표가 계산 - {ticker}: {target_price}, 현재가: {current_price}")
         if target_price is None:
             return False
-        return current_price > target_price 
+        
+        if current_price > target_price:
+            self.bot.logger.info(f"변동성 돌파 매수 - {ticker}: 현재가 {current_price:,}원, 목표가 {target_price:,}원")
+            return True
+        
+        return False 
