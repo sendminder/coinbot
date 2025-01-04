@@ -107,8 +107,6 @@ class TradingBot:
 
                 self.logger.info(
                     f"상태 업데이트 - 거래횟수: {daily_trade_count}/{self.config.trade_settings.max_daily_trades}, "
-                    f"현재잔고: {self.account.get_balance():,.0f}원, "
-                    f"코인수: {len(self.account.get_coin_balance())}, "
                     f"전략: {self.strategy_type.value}"
                 )
                 time.sleep(self.config.trade_settings.trade_interval)
