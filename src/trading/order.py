@@ -5,9 +5,10 @@ from src.config.trading_config import CoinConfig
 from src.utils.logger import get_logger
 
 class OrderManager:
-    def __init__(self, config, account):
+    def __init__(self, config, account, market):
         self.config = config
         self.account = account
+        self.market = market
         self.upbit = account.upbit
         self.logger = get_logger(__name__)
 

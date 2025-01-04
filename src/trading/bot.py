@@ -13,23 +13,17 @@ from src.trading.order import OrderManager
 from src.config.trading_config import TradingConfig
 
 class TradingBot:
-    def __init__(self, 
-                 strategy_type: TradingStrategy = TradingStrategy.COMBINED):
+    def __init__(self, strategy_type: TradingStrategy):
         """트레이딩 봇 초기화"""
         setup_logger()
         self.logger = get_logger(__name__)
         
-        self.config = TradingConfig()
-        if not self.config.is_valid():
-            raise ValueError("설정이 올바르지 않습니다.")
-            
-        self.upbit = self._initialize_upbit()
-        self.account = TradingAccount(self.upbit)
-        self.market = Market()
-        self.order_manager = OrderManager(self.upbit, self.account, self.market)
-        
         self.strategy_type = strategy_type
-        self.strategy = self._get_strategy(strategy_type)
+        self.config = TradingConfig()
+        self.market = Market()
+        self.account = TradingAccount(self.config.api_keys)
+        self.order_manager = OrderManager(self.config, self.account, self.market)
+        self.strategy = self._create_strategy()
 
     def _initialize_upbit(self) -> pyupbit.Upbit:
         """업비트 API 초기화"""
@@ -42,16 +36,19 @@ class TradingBot:
             self.logger.error(f"업비트 초기화 실패: {e}")
             raise
 
-    def _get_strategy(self, strategy_type: TradingStrategy) -> Strategy:
-        """
-        전략 객체 생성
-        """
-        if strategy_type == TradingStrategy.VOLATILITY:
+    def _create_strategy(self) -> Strategy:
+        """전략 타입에 따른 전략 객체 생성"""
+        if self.strategy_type == TradingStrategy.VOLATILITY:
+            from src.strategies.volatility import VolatilityStrategy
             return VolatilityStrategy(self)
-        elif strategy_type == TradingStrategy.HEIKIN_ASHI:
+        elif self.strategy_type == TradingStrategy.HEIKIN_ASHI:
+            from src.strategies.heikin_ashi import HeikinAshiStrategy
             return HeikinAshiStrategy(self)
-        else:
+        elif self.strategy_type == TradingStrategy.COMBINED:
+            from src.strategies.combined import CombinedStrategy
             return CombinedStrategy(self)
+        else:
+            raise ValueError(f"지원하지 않는 전략 타입입니다: {self.strategy_type}")
 
     def check_system_status(self) -> bool:
         """
