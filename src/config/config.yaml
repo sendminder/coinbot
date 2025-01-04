@@ -1,6 +1,6 @@
 trade_settings:
   max_daily_trades: 20
-  trade_interval: 60
+  trade_interval: 120
   min_krw_balance: 5000
   min_profit_krw: 50000
   min_loss_krw: 50000
