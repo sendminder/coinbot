@@ -1,8 +1,8 @@
 import logging
 from typing import Dict
 import pyupbit
-from utils.logger import get_logger
-from utils.api_config import APIConfig
+from src.utils.logger import get_logger
+from src.config.trading_config import APIConfig
 
 class TradingAccount:
     def __init__(self, api_keys: APIConfig):
