@@ -2,15 +2,6 @@
 
 echo "=== Upbit Auto Trading Bot 설치 시작 ==="
 
-# Python 버전 체크
-python_version=$(python3 -c 'import sys; print(".".join(map(str, sys.version_info[:2])))')
-required_version="3.9"
-
-if (( $(echo "$python_version < $required_version" | bc -l) )); then
-    echo "Error: Python $required_version 이상이 필요합니다. (현재 버전: $python_version)"
-    exit 1
-fi
-
 # 가상환경 생성
 echo "가상환경 생성 중..."
 python3 -m venv venv

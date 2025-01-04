@@ -2,3 +2,4 @@
 venv
 output.log
 trading.log
+__pycache__
