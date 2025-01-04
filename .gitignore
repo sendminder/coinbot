@@ -1,3 +1,4 @@
 .env
 venv
 output.log
+trading.log
