@@ -1,0 +1,16 @@
+trade_settings:
+  max_daily_trades: 20
+  trade_interval: 60
+  min_krw_balance: 5000
+  min_profit_krw: 50000
+  min_loss_krw: 50000
+
+coins:
+  BTC:
+    ticker: KRW-BTC
+    min_unit: 0.00008
+    take_profit: 1.5
+    profit_sell: 0.6
+    stop_loss: -2.0
+    partial_stop: -1.2
+    partial_sell: 0.4 

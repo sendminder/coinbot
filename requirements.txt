@@ -1,0 +1,6 @@
+pyupbit==0.2.33
+python-dotenv==1.0.0
+pyyaml==6.0.1
+pandas==2.1.1
+numpy==1.24.3
+requests==2.31.0 
