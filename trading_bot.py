@@ -3,121 +3,264 @@ import time
 import pyupbit
 from dotenv import load_dotenv
 import logging
-import numpy
+from datetime import datetime
+from typing import Dict, Optional, List
 
-# .env 파일에서 환경변수 로드
-load_dotenv()
+class TradingBot:
+    def __init__(self):
+        # 환경 설정 초기화
+        load_dotenv()
+        self._initialize_logging()
+        self._initialize_upbit()
+        self.coin_settings = self._get_coin_settings()
 
-# 업비트 접근 키
-access_key = os.getenv('UPBIT_ACCESS_KEY')
-secret_key = os.getenv('UPBIT_SECRET_KEY')
+    def _initialize_logging(self) -> None:
+        """로깅 설정"""
+        logging.basicConfig(
+            filename='trading.log',
+            level=logging.INFO,
+            format='%(asctime)s - %(levelname)s - %(message)s'
+        )
 
-# 업비트 객체 생성
-upbit = pyupbit.Upbit(access_key, secret_key)
+    def _initialize_upbit(self) -> None:
+        """업비트 API 초기화"""
+        try:
+            access_key = os.getenv('UPBIT_ACCESS_KEY')
+            secret_key = os.getenv('UPBIT_SECRET_KEY')
+            self.upbit = pyupbit.Upbit(access_key, secret_key)
+        except Exception as e:
+            logging.error(f"업비트 초기화 실패: {e}")
+            raise
 
-def get_target_price(ticker):
-    """변동성 돌파 전략으로 매수 목표가 조회
-    - K값을 변동성에 따라 동적으로 조정
-    - 이동평균선을 활용하여 추세 반영
-    - 거래량 가중치 적용
-    """
-    # 최근 20개의 4시간봉 데이터 조회
-    df = pyupbit.get_ohlcv(ticker, interval="minute240", count=20)
-    
-    # 변동성 계산 (ATR 활용)
-    df['TR'] = numpy.maximum(
-        df['high'] - df['low'],
-        numpy.abs(df['high'] - df['close'].shift(1)),
-        numpy.abs(df['low'] - df['close'].shift(1))
-    )
-    atr = df['TR'].mean()
-    
-    # 거래량 가중치 계산
-    volume_ma = df['volume'].mean()
-    volume_weight = df.iloc[-1]['volume'] / volume_ma
-    
-    # K값을 변동성에 따라 동적 조정 (0.3~0.7 범위)
-    k = max(0.3, min(0.7, (atr / df.iloc[-1]['close']) * 5))
-    
-    # 20기간 이동평균선
-    ma20 = df['close'].mean()
-    
-    # 기준가격 설정
-    last_close = df.iloc[-1]['close']
-    price_range = df.iloc[-1]['high'] - df.iloc[-1]['low']
-    
-    # 추세와 거래량을 반영한 목표가격 계산
-    target_price = last_close + (price_range * k * volume_weight)
-    
-    # 이동평균선 위에 있을 때만 매수 신호
-    if last_close > ma20:
-        return target_price
-    else:
-        return float('inf')  # 매수 신호 없음
+    def _get_coin_settings(self) -> Dict:
+        """코인별 설정"""
+        return {
+            "BTC": {
+                "ticker": "KRW-BTC",
+                "min_unit": 0.00008,
+                "take_profit": 1.5,
+                "profit_sell": 0.6,
+                "stop_loss": -2.0,
+                "partial_stop": -1.2,
+                "partial_sell": 0.4
+            },
+            "ETH": {
+                "ticker": "KRW-ETH",
+                "min_unit": 0.001,
+                "take_profit": 2.0,
+                "profit_sell": 0.5,
+                "stop_loss": -2.5,
+                "partial_stop": -1.5,
+                "partial_sell": 0.4
+            },
+            "ETC": {
+                "ticker": "KRW-ETC",
+                "min_unit": 0.01,
+                "take_profit": 2.5,
+                "profit_sell": 0.5,
+                "stop_loss": -3.0,
+                "partial_stop": -2.0,
+                "partial_sell": 0.4
+            }
+        }
 
-def get_current_price(ticker):
-    """현재가 조회"""
-    return pyupbit.get_orderbook(ticker=ticker)["orderbook_units"][0]["ask_price"]
+    @staticmethod
+    def get_target_price(ticker: str) -> Optional[float]:
+        """변동성 돌파 전략 목표가 계산"""
+        try:
+            df = pyupbit.get_ohlcv(ticker, interval="minute240", count=2)
+            return df.iloc[0]['close'] + (df.iloc[0]['high'] - df.iloc[0]['low']) * 0.5
+        except Exception as e:
+            logging.error(f"목표가 계산 실패 - {ticker}: {e}")
+            return None
 
-def get_balance(ticker):
-    """잔고 조회"""
-    balances = upbit.get_balances()
-    for b in balances:
-        if b['currency'] == ticker:
-            if b['balance'] is not None:
-                return float(b['balance'])
-    return 0
+    @staticmethod
+    def get_current_price(ticker: str) -> Optional[float]:
+        """현재가 조회"""
+        try:
+            return pyupbit.get_orderbook(ticker=ticker)["orderbook_units"][0]["ask_price"]
+        except Exception as e:
+            logging.error(f"현재가 조회 실패 - {ticker}: {e}")
+            return None
+
+    def get_balance(self, ticker: str) -> float:
+        """잔고 조회"""
+        try:
+            balances = self.upbit.get_balances()
+            for b in balances:
+                if b['currency'] == ticker:
+                    if b['balance'] is not None:
+                        return float(b['balance'])
+            return 0
+        except Exception as e:
+            logging.error(f"잔고 조회 실패 - {ticker}: {e}")
+            return 0
+
+    @staticmethod
+    def is_trade_time() -> bool:
+        """거래 시점 체크"""
+        now = datetime.now()
+        trade_hours = [0, 4, 8, 12, 16, 20]
+        return now.hour in trade_hours and now.minute < 5
+
+    def execute_buy(self, ticker: str, current_price: float) -> None:
+        """매수 실행"""
+        try:
+            krw = self.get_balance("KRW")
+            max_investment = krw * 0.05
+            
+            if krw > 5000:
+                invest_amount = min(krw * 0.9995, max_investment)
+                self.upbit.buy_market_order(ticker, invest_amount)
+                logging.info(f"매수 성공: {ticker} - 가격: {current_price:,}원, 투자금액: {invest_amount:,}원")
+        except Exception as e:
+            logging.error(f"매수 실패 - {ticker}: {e}")
+
+    def execute_sell(self, coin: str, settings: Dict, current_price: float) -> None:
+        """매도 실행"""
+        try:
+            coin_balance = self.get_balance(coin)
+            if coin_balance <= settings["min_unit"]:
+                return
+
+            ticker = settings["ticker"]
+            avg_buy_price = self.upbit.get_avg_buy_price(ticker)
+            profit_rate = (current_price - avg_buy_price) / avg_buy_price * 100
+
+            if profit_rate >= settings["take_profit"]:
+                self._handle_profit_sell(ticker, coin_balance, settings, profit_rate)
+            elif profit_rate <= settings["stop_loss"]:
+                self._handle_full_stop_loss(ticker, coin_balance, profit_rate)
+            elif profit_rate <= settings["partial_stop"]:
+                self._handle_partial_stop_loss(ticker, coin_balance, settings, profit_rate)
+
+        except Exception as e:
+            logging.error(f"매도 실패 - {coin}: {e}")
+
+    def _handle_profit_sell(self, ticker: str, balance: float, settings: Dict, profit_rate: float) -> None:
+        """익절 처리"""
+        sell_amount = balance * settings["profit_sell"]
+        self.upbit.sell_market_order(ticker, sell_amount)
+        logging.info(f"익절 매도: {ticker} - 수익률: {profit_rate:.2f}%, 매도량: {sell_amount}")
+
+    def _handle_full_stop_loss(self, ticker: str, balance: float, profit_rate: float) -> None:
+        """전량 손절 처리"""
+        self.upbit.sell_market_order(ticker, balance)
+        logging.info(f"전량 손절 매도: {ticker} - 수익률: {profit_rate:.2f}%, 매도량: {balance}")
+
+    def _handle_partial_stop_loss(self, ticker: str, balance: float, settings: Dict, profit_rate: float) -> None:
+        """부분 손절 처리"""
+        sell_amount = balance * settings["partial_sell"]
+        self.upbit.sell_market_order(ticker, sell_amount)
+        logging.info(f"부분 손절 매도: {ticker} - 수익률: {profit_rate:.2f}%, 매도량: {sell_amount}")
+
+    def log_portfolio_status(self) -> None:
+        """포트폴리오 상태 로깅"""
+        total_value = 0
+        for coin, settings in self.coin_settings.items():
+            balance = self.get_balance(coin)
+            if balance > 0:
+                ticker = settings["ticker"]
+                current = self.get_current_price(ticker)
+                avg_price = self.upbit.get_avg_buy_price(ticker)
+                profit = (current - avg_price) / avg_price * 100
+                value = current * balance
+                total_value += value
+                
+                logging.info(
+                    f"보유현황 - {coin}: {balance:.8f}, "
+                    f"평균매수가: {avg_price:,}원, "
+                    f"현재가: {current:,}원, "
+                    f"평가금액: {value:,}원, "
+                    f"수익률: {profit:.2f}%"
+                )
+        
+        krw_balance = self.get_balance("KRW")
+        total_value += krw_balance
+        logging.info(f"총 보유자산: {total_value:,}원 (현금: {krw_balance:,}원)")
+
+    def check_system_status(self) -> bool:
+        """시스템 상태 체크"""
+        try:
+            # 1. API 키 유효성 검증
+            balance = self.upbit.get_balance("KRW")
+            if balance is None:
+                logging.error("API 키 인증 실패")
+                return False
+
+            # 2. 잔고 확인
+            if balance < 5000:
+                logging.warning(f"잔고 부족: {balance}원")
+                return False
+
+            # 3. 서버 시간 동기화 체크
+            server_time = pyupbit.get_current_price("KRW-BTC")
+            if server_time is None:
+                logging.error("서버 연결 실패")
+                return False
+
+            return True
+
+        except Exception as e:
+            logging.error(f"시스템 체크 중 에러 발생: {e}")
+            return False
+
+    def run(self) -> None:
+        """메인 실행 함수"""
+        logging.info("자동매매 프로그램 시작")
+        print("자동매매 시작")
+
+        # 시스템 상태 체크
+        if not self.check_system_status():
+            logging.error("시스템 상태 체크 실패. 프로그램을 종료합니다.")
+            return
+
+        # 일일 거래 한도 설정
+        daily_trade_count = 0
+        last_trade_date = datetime.now().date()
+
+        while True:
+            try:
+                current_date = datetime.now().date()
+                
+                # 일일 거래 횟수 초기화
+                if current_date != last_trade_date:
+                    daily_trade_count = 0
+                    last_trade_date = current_date
+
+                # 일일 거래 한도 체크 (예: 20회)
+                if daily_trade_count >= 20:
+                    logging.info("일일 거래 한도 도달")
+                    time.sleep(60)
+                    continue
+
+                if self.is_trade_time():
+                    for coin, settings in self.coin_settings.items():
+                        ticker = settings["ticker"]
+                        current_price = self.get_current_price(ticker)
+                        target_price = self.get_target_price(ticker)
+
+                        if current_price is None or target_price is None:
+                            continue
+
+                        if target_price < current_price:
+                            self.execute_buy(ticker, current_price)
+
+                        self.execute_sell(coin, settings, current_price)
+                        time.sleep(1)
+
+                    self.log_portfolio_status()
+                    daily_trade_count += 1
+
+                time.sleep(60)
+
+            except Exception as e:
+                logging.error(f"전체 실행 중 에러 발생: {e}")
+                time.sleep(60)
 
 def main():
-    """메인 함수"""
-    print("자동매매 시작")
-    ticker = "KRW-BTC"
-    
-    # 거래 기록을 위한 로그 파일 설정
-    logging.basicConfig(filename='trading.log', level=logging.INFO)
-    
-    while True:
-        try:
-            now = time.localtime()
-            current_price = get_current_price(ticker)
-            
-            # 매수 로직 - 24시간 운영으로 변경
-            target_price = get_target_price(ticker)
-            krw = get_balance("KRW")
-            
-            # 투자금액 제한 설정 (전체 자산의 5%로 축소)
-            max_investment = krw * 0.05  # 더 잦은 매매를 고려해 비중 축소
-            
-            if target_price < current_price and krw > 5000:
-                invest_amount = min(krw * 0.9995, max_investment)
-                upbit.buy_market_order(ticker, invest_amount)
-                logging.info(f"매수: {ticker} - 가격: {current_price}, 투자금액: {invest_amount}")
-            
-            # 매도 로직 개선
-            else:
-                btc = get_balance("BTC")
-                if btc > 0.00008:
-                    avg_buy_price = upbit.get_avg_buy_price(ticker)
-                    profit_rate = (current_price - avg_buy_price) / avg_buy_price * 100
-                    
-                    # 손절/익절 조건 개선
-                    if profit_rate >= 5:  # 5% 이상 수익 시 익절
-                        sell_amount = btc * 0.5  # 보유량의 50%만 매도
-                        upbit.sell_market_order(ticker, sell_amount)
-                        logging.info(f"익절 매도: {ticker} - 수익률: {profit_rate:.2f}%")
-                    elif profit_rate <= -3:  # 3% 이상 손실 시 부분 손절
-                        sell_amount = btc * 0.5  # 보유량의 50%만 매도
-                        upbit.sell_market_order(ticker, sell_amount)
-                        logging.info(f"부분 손절 매도: {ticker} - 수익률: {profit_rate:.2f}%")
-                    elif profit_rate <= -5:  # 5% 이상 손실 시 전량 손절
-                        upbit.sell_market_order(ticker, btc)
-                        logging.info(f"전량 손절 매도: {ticker} - 수익률: {profit_rate:.2f}%")
-            
-            time.sleep(600)  # 10분마다 체크 (너무 자주 체크할 필요 없음)
-            
-        except Exception as e:
-            logging.error(f"에러 발생: {e}")
-            time.sleep(10)
+    bot = TradingBot()
+    bot.run()
 
 if __name__ == "__main__":
     main() 
