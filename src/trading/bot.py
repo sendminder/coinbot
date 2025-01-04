@@ -22,6 +22,7 @@ class TradingBot:
         self.config = TradingConfig()
         self.market = Market()
         self.account = TradingAccount(self.config.api_keys)
+        self.upbit = self.account.upbit
         self.order_manager = OrderManager(self.config, self.account, self.market)
         self.strategy = self._create_strategy()
 
