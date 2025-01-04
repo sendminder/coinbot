@@ -28,8 +28,8 @@ class HeikinAshiStrategy(Strategy):
                 ha_close.iloc[-i] < ha_open.iloc[-i] 
                 for i in range(1, recent_candles+1)
             )
-            
-            return {
+
+            result = {
                 'open': ha_open.iloc[-1],
                 'high': ha_high.iloc[-1],
                 'low': ha_low.iloc[-1],
@@ -39,6 +39,9 @@ class HeikinAshiStrategy(Strategy):
                 'body_size': abs(ha_close.iloc[-1] - ha_open.iloc[-1]),
                 'prev_trend': 'up' if ha_close.iloc[-2] > ha_open.iloc[-2] else 'down'
             }
+            
+            self.bot.logger.info(f"하이킨 아시 데이터 - {ticker}: {result}")
+            return result
             
         except Exception as e:
             self.bot.logger.error(f"하이킨 아시 계산 실패 - {ticker}: {e}")
