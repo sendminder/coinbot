@@ -1,10 +1,13 @@
 import logging
 from typing import Dict
+import pyupbit
+from utils.logger import get_logger
+from utils.api_config import APIConfig
 
 class TradingAccount:
-    def __init__(self, upbit):
-        self.upbit = upbit
-        self.logger = logging.getLogger(__name__)
+    def __init__(self, api_keys: APIConfig):
+        self.upbit = pyupbit.Upbit(api_keys.access_key, api_keys.secret_key)
+        self.logger = get_logger(__name__)
         self.TOTAL_ASSETS = 4000000  # 총 자산 400만원
         self.MIN_INVEST_RATIO = 0.015  # 최소 투자비율 1.5%
         self.MAX_INVEST_RATIO = 0.05   # 최대 투자비율 5%

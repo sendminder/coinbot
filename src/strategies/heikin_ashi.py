@@ -43,14 +43,9 @@ class HeikinAshiStrategy(Strategy):
     def should_buy(self, ticker: str, current_price: float) -> bool:
         """하이킨 아시 전략 매수 시점 판단"""
         ha_data = self.get_heikin_ashi(ticker)
-        if not ha_data:
+        if ha_data is None:
             return False
             
-        conditions = [
-            ha_data['trend'] == 'up',
-            ha_data['strong_trend'],
-            ha_data['body_size'] > 0,
-            ha_data['prev_trend'] == 'up'
-        ]
-        
-        return all(conditions) 
+        return (ha_data['trend'] == 'up' and 
+                ha_data['strong_trend'] and 
+                ha_data['prev_trend'] == 'down')  # 상승 반전 시점 

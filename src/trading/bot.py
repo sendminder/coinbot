@@ -52,20 +52,18 @@ class TradingBot:
             raise ValueError(f"지원하지 않는 전략 타입입니다: {self.strategy_type}")
 
     def check_system_status(self) -> bool:
-        """
-        시스템 상태 점검
-        """
+        """시스템 상태 점검"""
         try:
-            balance = self.upbit.get_balance("KRW")
+            balance = self.account.get_balance("KRW")
             if balance is None:
                 self.logger.error("API 키 인증 실패")
                 return False
 
-            if balance < 5000:
+            if balance < self.config.trade_settings.min_krw_balance:
                 self.logger.warning(f"잔고 부족: {balance}원")
                 return False
 
-            server_time = pyupbit.get_current_price("KRW-BTC")
+            server_time = self.market.get_current_price("KRW-BTC")
             if server_time is None:
                 self.logger.error("서버 연결 실패")
                 return False
