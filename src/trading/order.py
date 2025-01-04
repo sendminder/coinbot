@@ -1,13 +1,14 @@
 import logging
 from typing import Dict
+import pyupbit
+from src.config.trading_config import CoinConfig
 from src.utils.logger import get_logger
-from src.trading.account import CoinConfig
 
 class OrderManager:
-    def __init__(self, upbit, account, market):
-        self.upbit = upbit
+    def __init__(self, config, account):
+        self.config = config
         self.account = account
-        self.market = market
+        self.upbit = account.upbit
         self.logger = get_logger(__name__)
 
     def execute_buy(self, ticker: str, current_price: float, strategy) -> None:
