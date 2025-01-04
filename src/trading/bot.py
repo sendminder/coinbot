@@ -63,7 +63,7 @@ class TradingBot:
                 self.logger.warning(f"잔고 부족: {balance}원")
                 return False
 
-            server_time = self.market.get_current_price("KRW-BTC")
+            server_time = pyupbit.get_current_price("KRW-BTC")
             if server_time is None:
                 self.logger.error("서버 연결 실패")
                 return False
@@ -115,7 +115,7 @@ class TradingBot:
         """거래 사이클 실행"""
         for coin, coin_config in self.config.coin_settings.items():
             ticker = coin_config.ticker
-            current_price = self.market.get_current_price(ticker)
+            current_price = pyupbit.get_current_price(ticker)
             
             if current_price is None:
                 continue

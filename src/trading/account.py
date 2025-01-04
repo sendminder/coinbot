@@ -54,7 +54,7 @@ class TradingAccount:
                 avg_price = self.get_average_buy_price(ticker)
                 
                 if balance > 0:
-                    current_price = self.upbit.get_current_price(ticker)
+                    current_price = pyupbit.get_current_price(ticker)
                     if current_price:
                         coin_value = balance * current_price
                         profit_loss = ((current_price - avg_price) / avg_price) * 100
