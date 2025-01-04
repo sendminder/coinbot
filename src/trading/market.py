@@ -1,3 +1,8 @@
+import logging
+from typing import Optional
+import pyupbit
+from datetime import datetime
+
 class Market:
     def __init__(self):
         self.ha_interval = "minute60"    # 하이킨 아시용 1시간봉
