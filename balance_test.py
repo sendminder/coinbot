@@ -16,12 +16,12 @@ def print_balances():
     """전체 보유 자산 출력"""
     print("=== 나의 보유 자산 ===")
     balances = upbit.get_balances()
-    
+
     for b in balances:
         currency = b['currency']          # 화폐 종류
         balance = float(b['balance'])     # 보유 수량
         avg_buy_price = float(b['avg_buy_price'])  # 매수 평균가
-        
+
         if currency == 'KRW':
             print(f"원화: {balance:,.0f}원")
         else:
@@ -35,4 +35,4 @@ def print_balances():
                 print("------------------------")
 
 if __name__ == "__main__":
-    print_balances() 
+    print_balances()

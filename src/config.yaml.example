@@ -13,4 +13,4 @@ coins:
     profit_sell: 0.6
     stop_loss: -2.0
     partial_stop: -1.2
-    partial_sell: 0.4 
+    partial_sell: 0.4

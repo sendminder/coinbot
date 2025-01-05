@@ -24,7 +24,7 @@
 ```bash
 git clone https://github.com/sendminder/coinbot.git
 cd coinbot
-``` 
+```
 
 ### 2. 가상환경 설정 및 활성화
 ```bash
@@ -51,7 +51,7 @@ UPBIT_ACCESS_KEY=your_access_key_here
 UPBIT_SECRET_KEY=your_secret_key_here
 ```
 
-2. `src/config/config.yaml` 설정
+1. `src/config.yaml` 설정
 ```yaml
 trade_settings:
   max_daily_trades: 20          # 일일 최대 거래 횟수
@@ -77,7 +77,7 @@ python src/main.py
 
 ### 백그라운드 실행 (Linux/Mac)
 ```bash
-nohup python src/main.py > trading.log 2>&1 &
+nohup python3 main.py
 ```
 
 ## 모니터링 및 로그 확인
@@ -95,5 +95,5 @@ nohup python src/main.py > trading.log 2>&1 &
 ## 기여하기
 버그 리포트, 기능 제안, PR은 언제나 환영합니다.
 
-## 라이선스
+## 라이센스
 MIT License

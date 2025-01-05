@@ -23,4 +23,4 @@ class Strategy(ABC):
 
     def get_target_price(self, ticker: str) -> Optional[float]:
         """기본 목표가 계산 메서드 - 필요시 오버라이드"""
-        return None 
+        return None

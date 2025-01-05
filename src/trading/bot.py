@@ -17,7 +17,7 @@ class TradingBot:
         """트레이딩 봇 초기화"""
         setup_logger()
         self.logger = get_logger(__name__)
-        
+
         self.strategy_type = strategy_type
         self.config = TradingConfig()
         self.market = Market()
@@ -77,7 +77,7 @@ class TradingBot:
     def run(self) -> None:
         """메인 실행 함수"""
         self.logger.info(f"자동매매 프로그램 시작 - 전략: {self.strategy_type.value}")
-        
+
         if not self.check_system_status():
             self.logger.error("시스템 상태 체크 실패. 프로그램을 종료합니다.")
             return
@@ -112,12 +112,10 @@ class TradingBot:
         for coin, coin_config in self.config.coin_settings.items():
             ticker = coin_config.ticker
             current_price = pyupbit.get_current_price(ticker)
-            
+
             if current_price is None:
                 continue
 
             self.order_manager.execute_buy(ticker, current_price, self.strategy)
             self.order_manager.execute_sell(coin, coin_config, current_price)
             time.sleep(1)
-
-        self.account.log_portfolio_status(self.config.coin_settings) 

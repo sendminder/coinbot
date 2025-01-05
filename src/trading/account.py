@@ -47,19 +47,19 @@ class TradingAccount:
         """포트폴리오 상태 로깅"""
         try:
             total_value = self.get_balance("KRW")
-            
+
             for coin, coin_config in coin_settings.items():
                 ticker = coin_config.ticker
                 balance = self.get_balance(coin)
                 avg_price = self.get_average_buy_price(ticker)
-                
+
                 if balance > 0:
                     current_price = pyupbit.get_current_price(ticker)
                     if current_price:
                         coin_value = balance * current_price
                         profit_loss = ((current_price - avg_price) / avg_price) * 100
                         total_value += coin_value
-                        
+
                         self.logger.info(
                             f"코인: {coin}, 보유량: {balance:.8f}, "
                             f"평균매수가: {avg_price:,.0f}, 현재가: {current_price:,.0f}, "
@@ -67,6 +67,6 @@ class TradingAccount:
                         )
 
             self.logger.info(f"총 평가금액: {total_value:,.0f}원")
-            
+
         except Exception as e:
-            self.logger.error(f"포트폴리오 상태 로깅 실패: {e}") 
+            self.logger.error(f"포트폴리오 상태 로깅 실패: {e}")

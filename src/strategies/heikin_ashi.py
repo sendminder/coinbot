@@ -13,7 +13,7 @@ class HeikinAshiStrategy(Strategy):
         """
         try:
             df = pyupbit.get_ohlcv(ticker, interval=self.ha_interval, count=24)
-            
+
             ha_close = (df['open'] + df['high'] + df['low'] + df['close']) / 4
             ha_open = (df['open'].shift(1) + df['close'].shift(1)) / 2
             ha_open.iloc[0] = (df['open'].iloc[0] + df['close'].iloc[0]) / 2
@@ -22,10 +22,10 @@ class HeikinAshiStrategy(Strategy):
 
             recent_candles = 3
             strong_trend = all(
-                ha_close.iloc[-i] > ha_open.iloc[-i] 
+                ha_close.iloc[-i] > ha_open.iloc[-i]
                 for i in range(1, recent_candles+1)
             ) or all(
-                ha_close.iloc[-i] < ha_open.iloc[-i] 
+                ha_close.iloc[-i] < ha_open.iloc[-i]
                 for i in range(1, recent_candles+1)
             )
 
@@ -39,9 +39,9 @@ class HeikinAshiStrategy(Strategy):
                 'body_size': abs(ha_close.iloc[-1] - ha_open.iloc[-1]),
                 'prev_trend': 'up' if ha_close.iloc[-2] > ha_open.iloc[-2] else 'down'
             }
-            
+
             return result
-            
+
         except Exception as e:
             self.bot.logger.error(f"하이킨 아시 계산 실패 - {ticker}: {e}")
             return None
@@ -51,9 +51,9 @@ class HeikinAshiStrategy(Strategy):
         ha_data = self.get_heikin_ashi(ticker)
         if ha_data is None:
             return False
-        
-        buy = (ha_data['trend'] == 'up' and 
-                ha_data['strong_trend'] and 
+
+        buy = (ha_data['trend'] == 'up' and
+                ha_data['strong_trend'] and
                 ha_data['prev_trend'] == 'down')
 
         if buy:
@@ -63,5 +63,5 @@ class HeikinAshiStrategy(Strategy):
                 f"강세여부={ha_data['strong_trend']}, "
                 f"이전추세={ha_data['prev_trend']}"
             )
-            
-        return buy  # 상승 반전 시점 
+
+        return buy  # 상승 반전 시점

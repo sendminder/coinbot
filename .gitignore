@@ -1,5 +1,4 @@
 .env
 venv
-output.log
-trading.log
+logs/trading.log
 __pycache__

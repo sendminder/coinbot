@@ -13,12 +13,11 @@ class OrderManager:
         """매수 로직 실행"""
         try:
             if not strategy.should_buy(ticker, current_price):
-                self.logger.info(f"매수 안함 - {ticker}: 매수 조건 불만족")
                 return
-                
+
             krw = self.account.get_balance("KRW")
             invest_amount = self.account.calculate_invest_amount(krw)
-            
+
             if krw > invest_amount:
                 invest_amount = invest_amount * 0.9995  # 수수료 고려
                 self.upbit.buy_market_order(ticker, invest_amount)
@@ -29,7 +28,7 @@ class OrderManager:
                 )
             else:
                 self.logger.info(f"매수 안함 - {ticker}: 잔액 부족")
-                
+
         except Exception as e:
             self.logger.error(f"매수 실패 - {ticker}: {e}")
 
@@ -48,7 +47,7 @@ class OrderManager:
 
             profit_rate = ((current_price - avg_price) / avg_price) * 100
             profit_krw = (current_price - avg_price) * balance
-            
+
             # 익절
             if profit_rate >= coin_config.take_profit:
                 if profit_krw >= self.config.trade_settings.min_profit_krw:
@@ -73,4 +72,4 @@ class OrderManager:
                 return
 
         except Exception as e:
-            self.logger.error(f"매도 실패 - {coin_config.ticker}: {e}") 
+            self.logger.error(f"매도 실패 - {coin_config.ticker}: {e}")

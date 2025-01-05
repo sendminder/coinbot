@@ -27,9 +27,9 @@ class VolatilityStrategy(Strategy):
         target_price = self.get_target_price(ticker)
         if target_price is None:
             return False
-        
+
         if current_price > target_price:
             self.bot.logger.info(f"변동성 돌파 매수 - {ticker}: 현재가 {current_price:,}원, 목표가 {target_price:,}원")
             return True
-        
-        return False 
+
+        return False

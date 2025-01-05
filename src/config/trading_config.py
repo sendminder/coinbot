@@ -33,7 +33,7 @@ class TradingConfig:
         self._load_environment()
         self.api_keys = self._load_api_keys()
         self._load_yaml_config()
-        
+
     def _load_environment(self) -> None:
         """환경 변수 로드"""
         load_dotenv()
@@ -47,13 +47,13 @@ class TradingConfig:
 
     def _load_yaml_config(self) -> None:
         """YAML 설정 파일 로드"""
-        config_path = Path(__file__).parent / 'config.yaml'
+        config_path = Path(__file__).parent.parent / 'config.yaml'
         with open(config_path, 'r', encoding='utf-8') as f:
             config = yaml.safe_load(f)
-            
+
         # 거래 설정 로드
         self.trade_settings = TradeSettings(**config['trade_settings'])
-        
+
         # 코인 설정 로드
         self.coin_settings = {}
         for coin, settings in config['coins'].items():
@@ -73,4 +73,4 @@ class TradingConfig:
             return False
         if not self.coin_settings:
             return False
-        return True 
+        return True
