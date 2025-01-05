@@ -98,8 +98,9 @@ class TradingBot:
                     continue
 
                 if self.market.is_trade_time():
-                    self._execute_trading_cycle()
-                    daily_trade_count += 1
+                    trades_executed = self._execute_trading_cycle()
+                    if trades_executed:
+                        daily_trade_count += 1
 
                 time.sleep(self.config.trade_settings.trade_interval)
 
@@ -107,8 +108,9 @@ class TradingBot:
                 self.logger.error(f"전체 실행 중 에러 발생: {e}")
                 time.sleep(self.config.trade_settings.trade_interval)
 
-    def _execute_trading_cycle(self):
+    def _execute_trading_cycle(self) -> bool:
         """거래 사이클 실행"""
+        trades_executed = False
         for coin, coin_config in self.config.coin_settings.items():
             ticker = coin_config.ticker
             current_price = pyupbit.get_current_price(ticker)
@@ -116,6 +118,10 @@ class TradingBot:
             if current_price is None:
                 continue
 
-            self.order_manager.execute_buy(ticker, current_price, self.strategy)
-            self.order_manager.execute_sell(coin, coin_config, current_price)
+            if self.order_manager.execute_buy(ticker, current_price, self.strategy):
+                trades_executed = True
+            if self.order_manager.execute_sell(coin, coin_config, current_price):
+                trades_executed = True
             time.sleep(1)
+
+        return trades_executed
