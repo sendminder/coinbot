@@ -15,6 +15,7 @@ class Market:
     @staticmethod
     def is_trade_time() -> bool:
         """거래 시점 체크"""
-        now = datetime.now()
-        trade_hours = [0, 4, 8, 12, 16, 20]
-        return now.hour in trade_hours and now.minute < 5
+        # now = datetime.now()
+        # trade_hours = [0, 4, 8, 12, 16, 20]
+        # return now.hour in trade_hours and now.minute < 5
+        return True
