@@ -22,11 +22,6 @@ if [ ! -f .env ]; then
     echo ".env 파일이 생성되었습니다. API 키를 설정해주세요."
 fi
 
-if [ ! -f src/config.yaml ]; then
-    cp src/config.yaml.example src/config.yaml
-    echo "config.yaml 파일이 생성되었습니다. 설정을 수정해주세요."
-fi
-
 # 로그 디렉토리 생성
 echo "로그 디렉토리 생성 중..."
 mkdir -p logs
@@ -36,7 +31,7 @@ echo """
 
 다음 단계를 진행해주세요:
 1. .env 파일에 API 키를 설정
-2. src/config.yaml 파일에서 거래 설정 수정
+2. config.yaml 파일에서 거래 설정 수정
 3. 실행: python main.py
 
 주의: 반드시 소액으로 테스트 후 사용하세요!

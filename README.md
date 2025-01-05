@@ -51,7 +51,7 @@ UPBIT_ACCESS_KEY=your_access_key_here
 UPBIT_SECRET_KEY=your_secret_key_here
 ```
 
-1. `src/config.yaml` 설정
+1. `config.yaml` 설정
 ```yaml
 trade_settings:
   max_daily_trades: 20          # 일일 최대 거래 횟수

@@ -47,7 +47,7 @@ class TradingConfig:
 
     def _load_yaml_config(self) -> None:
         """YAML 설정 파일 로드"""
-        config_path = Path(__file__).parent.parent / 'config.yaml'
+        config_path = Path(__file__).parent.parent.parent / 'config.yaml'
         with open(config_path, 'r', encoding='utf-8') as f:
             config = yaml.safe_load(f)
 
