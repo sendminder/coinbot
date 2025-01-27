@@ -1,5 +1,6 @@
 from src.config.trading_config import CoinConfig
 from src.utils.logger import get_logger
+from datetime import datetime
 
 class OrderManager:
     def __init__(self, config, account, market):
@@ -8,10 +9,19 @@ class OrderManager:
         self.market = market
         self.upbit = account.upbit
         self.logger = get_logger(__name__)
+        self.last_buy_time = {}  # 코인별 마지막 구매 시점 저장
 
     def execute_buy(self, ticker: str, current_price: float, strategy) -> None:
         """매수 로직 실행"""
         try:
+            # 최근 1시간 이내 구매 여부 확인
+            current_time = datetime.now()
+            if ticker in self.last_buy_time:
+                time_diff = (current_time - self.last_buy_time[ticker]).total_seconds() / 3600  # 시간 단위로 변환
+                if time_diff < 1:  # 1시간 이내라면
+                    self.logger.info(f"매수 제외 - {ticker}: 최근 1시간 이내 매수 이력 있음")
+                    return
+
             if not strategy.should_buy(ticker, current_price):
                 return
 
@@ -21,6 +31,7 @@ class OrderManager:
             if krw > invest_amount:
                 invest_amount = invest_amount * 0.9995  # 수수료 고려
                 self.upbit.buy_market_order(ticker, invest_amount)
+                self.last_buy_time[ticker] = current_time  # 구매 시점 기록
                 self.logger.info(
                     f"매수 성공: {ticker} - 가격: {current_price:,}원, "
                     f"투자금액: {invest_amount:,}원 "
